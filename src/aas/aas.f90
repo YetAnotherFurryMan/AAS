@@ -3,11 +3,11 @@ program aas
 
     implicit none
 
-    character(len=20), target :: src
+    character(len=32), target :: src
     type(aas_state) :: state
     type(aas_token) :: tok
 
-    src = "This is a test"
+    src = "This 'is' a test 123 "//char(34)//"s\tr\nwow"//char(34)
 
     state = aas_state(pos = 1, src = null())
 

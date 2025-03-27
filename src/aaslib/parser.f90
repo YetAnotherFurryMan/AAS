@@ -131,6 +131,8 @@ contains
                         case ('b')
                             tok%text = tok%text // char(7)
                     end select
+                
+                    begin = state%pos + 1
                 end if
 
                 state%pos = state%pos + 1
