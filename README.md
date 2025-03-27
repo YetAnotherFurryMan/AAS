@@ -2,7 +2,7 @@
 Asset Assembler Script - a simple, assembly-like scripting language made for procedular asset generation (images, animations, sound, models).
 
 # Quick start
-This project uses [bro](github.com/yetanotherfurryman/bro) as build system. The only thing you really need to compile this
+This project uses [bro](https://github.com/yetanotherfurryman/bro) as build system. The only thing you really need to compile this
 project form source is C++17 compiler like `gcc` or `clang` and Fortran compiler like `gfortran` (this is waht I use).
 
 ``` bash
