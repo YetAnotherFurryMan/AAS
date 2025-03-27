@@ -50,11 +50,11 @@ contains
         type(aas_token), intent(out) :: tok
         integer :: begin
 
-        do while(state%pos < len_trim(state%src) .and. state%src(state%pos:state%pos) == ' ')
+        do while(state%pos <= len_trim(state%src) .and. state%src(state%pos:state%pos) == ' ')
             state%pos = state%pos + 1
         end do
 
-        if (state%pos >= len_trim(state%src)) then
+        if (state%pos > len_trim(state%src)) then
             tok = aas_token(tt = AAS_TT_EOF, text = null())
             return
         end if
@@ -64,7 +64,7 @@ contains
         if (is_valid_id_ch(state%src(state%pos:state%pos), .true.)) then
             begin = state%pos
 
-            do while (state%pos < len_trim(state%src) .and. is_valid_id_ch(state%src(state%pos:state%pos), .false.))
+            do while (state%pos <= len_trim(state%src) .and. is_valid_id_ch(state%src(state%pos:state%pos), .false.))
                 state%pos = state%pos + 1
             end do
             
@@ -74,7 +74,7 @@ contains
             begin = state%pos
             state%pos = state%pos + 1
 
-            do while (state%pos < len_trim(state%src) .and. is_valid_num_ch(state%src(state%pos:state%pos)))
+            do while (state%pos <= len_trim(state%src) .and. is_valid_num_ch(state%src(state%pos:state%pos)))
                 state%pos = state%pos + 1
             end do
 
@@ -85,11 +85,11 @@ contains
             state%pos = state%pos + 1
             begin = state%pos
 
-            do while (state%pos < len_trim(state%src) .and. state%src(state%pos:state%pos) /= char(39))
+            do while (state%pos <= len_trim(state%src) .and. state%src(state%pos:state%pos) /= char(39))
                 state%pos = state%pos + 1
             end do
 
-            if (state%pos >= len_trim(state%src)) then
+            if (state%pos > len_trim(state%src)) then
                 tok%text = state%src(begin - 1:)
             else
                 tok%tt = AAS_TT_STR
@@ -103,13 +103,13 @@ contains
 
             tok%text = ""
 
-            do while (state%pos < len_trim(state%src) .and. state%src(state%pos:state%pos) /= char(34))
+            do while (state%pos <= len_trim(state%src) .and. state%src(state%pos:state%pos) /= char(34))
                 if (state%src(state%pos:state%pos) == '\') then
                     tok%text = tok%text // state%src(begin:state%pos - 1)
 
                     state%pos = state%pos + 1
                     
-                    if (state%pos >= len_trim(state%src)) then
+                    if (state%pos > len_trim(state%src)) then
                         exit
                     end if
 
@@ -137,7 +137,7 @@ contains
             end do
 
             tok%text = tok%text // state%src(begin:state%pos - 1)
-            if (state%pos < len_trim(state%src)) then
+            if (state%pos <= len_trim(state%src)) then
                 tok%tt = AAS_TT_STR
                 state%pos = state%pos + 1
             end if
