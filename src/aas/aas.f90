@@ -7,8 +7,6 @@ program aas
     logical :: file_exists, error
     character(len=128) :: program_name, input_path
     character(len=:), allocatable, target :: src
-    ! type(aas_state) :: state
-    ! type(aas_token) :: tok
     type(aas_token), dimension(:), allocatable, target :: prog
 
     argc = command_argument_count()

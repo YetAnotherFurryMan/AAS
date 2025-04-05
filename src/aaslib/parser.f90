@@ -5,6 +5,7 @@ module aas_parser
         enumerator AAS_TT_ERROR, AAS_TT_EOF, AAS_TT_ID, AAS_TT_STR, AAS_TT_INT
     end enum
 
+    ! TODO: Use CLASS and EXTENDS to mimic UNION and parse ints etc the same way we parse str
     type :: aas_token
         integer :: tt
         character(len=:), allocatable :: text
@@ -48,7 +49,7 @@ contains
     pure logical function is_white_ch(ch)
         character, intent(in) :: ch
 
-        is_white_ch = ch == ' ' .or. ch == char(10)
+        is_white_ch = ch == ' ' .or. ch == char(10) .or. ch == char(13) .or. ch == char(9) .or. ch == char(7)
     end function is_white_ch
 
     subroutine aas_next_token(state, tok)
