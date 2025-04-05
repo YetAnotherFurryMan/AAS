@@ -45,12 +45,18 @@ contains
 
     end function is_valid_id_ch
 
+    pure logical function is_white_ch(ch)
+        character, intent(in) :: ch
+
+        is_white_ch = ch == ' ' .or. ch == char(10)
+    end function is_white_ch
+
     subroutine aas_next_token(state, tok)
         type(aas_state), intent(inout) :: state
         type(aas_token), intent(out) :: tok
         integer :: begin
 
-        do while(state%pos <= len_trim(state%src) .and. state%src(state%pos:state%pos) == ' ')
+        do while(state%pos <= len_trim(state%src) .and. is_white_ch(state%src(state%pos:state%pos)))
             state%pos = state%pos + 1
         end do
 
