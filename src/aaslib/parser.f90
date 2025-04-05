@@ -152,4 +152,39 @@ contains
         end if
     end subroutine aas_next_token
 
+    subroutine aas_parse(src, prog, error)
+        character(len=:), pointer, intent(in) :: src
+        type(aas_token), dimension(:), allocatable, intent(out) :: prog
+        logical, intent(out) :: error
+
+        type(aas_token) :: tok
+        type(aas_state) :: state
+
+        state = aas_state(pos=1, src=null())
+        state%src => src
+
+        allocate(prog(1))
+        call aas_next_token(state, tok)
+        prog(1) = tok
+
+        do while (tok%tt /= AAS_TT_ERROR .and. tok%tt /= AAS_TT_EOF)
+            call aas_next_token(state, tok)
+            prog = [prog, tok]
+        end do
+
+        error = tok%tt == AAS_TT_ERROR
+    end subroutine aas_parse
+
+    subroutine aas_free(prog)
+        type(aas_token), dimension(:), pointer, intent(in) :: prog
+
+        integer :: i
+
+        do i = 1, size(prog)
+            if (allocated(prog(i)%text)) then
+                deallocate(prog(i)%text)
+            end if
+        end do
+    end subroutine aas_free
+
 end module aas_parser

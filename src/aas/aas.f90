@@ -3,12 +3,13 @@ program aas
 
     implicit none
 
-    integer :: argc, input_size
-    logical :: file_exists
+    integer :: argc, input_size, i
+    logical :: file_exists, error
     character(len=128) :: program_name, input_path
     character(len=:), allocatable, target :: src
-    type(aas_state) :: state
-    type(aas_token) :: tok
+    ! type(aas_state) :: state
+    ! type(aas_token) :: tok
+    type(aas_token), dimension(:), allocatable, target :: prog
 
     argc = command_argument_count()
     call get_command_argument(0, program_name)
@@ -36,28 +37,28 @@ program aas
     allocate(character(len=input_size) :: src)
 
     open(10, file=input_path, status="old", access="stream")
-    read (10) src
+    read(10) src
     close(10)
 
-    state = aas_state(pos = 1, src = null())
-    state%src => src
+    call aas_parse(src, prog, error)
 
-    call aas_next_token(state, tok)
-    print *, tok%tt
-    if (allocated(tok%text)) then
-        print *, "Text: ", tok%text
-        deallocate(tok%text)
+    deallocate(src)
+
+    if (error) then
+        print *, "An error occured"
+        call aas_free(prog)
+        deallocate(prog)
+        stop
     end if
 
-    do while (tok%tt /= AAS_TT_ERROR .and. tok%tt /= AAS_TT_EOF)
-        call aas_next_token(state, tok)
-        print *, tok%tt
-        if (allocated(tok%text)) then
-            print *, "Text: ", tok%text
-            deallocate(tok%text)
+    do i = 1, size(prog)
+        print "(I0,$)", prog(i)%tt
+        if (allocated(prog(i)%text)) then
+            print *, "Text: ", prog(i)%text
         end if
     end do
 
-    deallocate(src)
+    call aas_free(prog)
+    deallocate(prog)
 
 end program aas
