@@ -1,9 +1,11 @@
 #pragma once
 
-#include <set>
+#include <stack>
 #include <vector>
 #include <string>
+#include <memory>
 #include <iostream>
+#include <functional>
 #include <string_view>
 #include <unordered_map>
 
@@ -22,6 +24,21 @@ namespace aas{
 		std::string_view filename;
 		std::size_t lineno;
 		std::size_t charno;
+
+		Token() = default;
+		Token(TokenType type, std::string_view filename, std::size_t lineno, std::size_t charno):
+			type{type}, filename{filename}, lineno{lineno}, charno{charno}
+		{}
+
+		virtual ~Token() = default;
+
+		virtual Token* copy() const {
+			return new Token(type, filename, lineno, charno);
+		}
+
+		inline std::string strloc(){
+			return "[" + std::to_string(lineno) + ":" + std::to_string(charno) + "]";
+		}
 	};
 
 	struct Number: public Token{
@@ -29,13 +46,13 @@ namespace aas{
 
 		Number() = default;
 		Number(std::string_view filename, std::size_t lineno, std::size_t charno, int value):
-			Token{
-				.type = TokenType::NUMBER,
-				.filename = filename,
-				.lineno = lineno,
-				.charno = charno
-			}, value{value}
+			Token{TokenType::NUMBER, filename, lineno, charno},
+			value{value}
 		{}
+
+		Token* copy() const override {
+			return new Number(filename, lineno, charno, value);
+		}
 	};
 
 	struct String: public Token{
@@ -43,13 +60,13 @@ namespace aas{
 
 		String() = default;
 		String(std::string_view filename, std::size_t lineno, std::size_t charno, std::string_view value):
-			Token{
-				.type = TokenType::STRING,
-				.filename = filename,
-				.lineno = lineno,
-				.charno = charno
-			}, value{value}
+			Token{TokenType::STRING, filename, lineno, charno},
+			value{value}
 		{}
+
+		Token* copy() const override {
+			return new String(filename, lineno, charno, value);
+		}
 	};
 
 	struct FString: public Token{
@@ -57,13 +74,13 @@ namespace aas{
 
 		FString() = default;
 		FString(std::string_view filename, std::size_t lineno, std::size_t charno, std::string_view value):
-			Token{
-				.type = TokenType::FSTRING,
-				.filename = filename,
-				.lineno = lineno,
-				.charno = charno
-			}, value{value}
+			Token{TokenType::FSTRING, filename, lineno, charno},
+			value{value}
 		{}
+
+		Token* copy() const override {
+			return new FString(filename, lineno, charno, value);
+		}
 	};
 
 	struct Identifier: public Token{
@@ -71,23 +88,48 @@ namespace aas{
 
 		Identifier() = default;
 		Identifier(std::string_view filename, std::size_t lineno, std::size_t charno, std::size_t index):
-			Token{
-				.type = TokenType::IDENTIFIER,
-				.filename = filename,
-				.lineno = lineno,
-				.charno = charno
-			}, index{index}
+			Token{TokenType::IDENTIFIER, filename, lineno, charno},
+			index{index}
 		{}
+
+		Token* copy() const override {
+			return new Identifier(filename, lineno, charno, index);
+		}
 	};
 
+	// TODO: Create struct Data for.. data
 	struct Program{
-		std::vector<std::string> ids;
+		std::vector<std::string> ids = {""};
 		std::unordered_map<std::string, std::size_t> id_dict;
+		std::unordered_map<std::size_t, std::function<int(Program&, std::size_t&)>> commands;
 		std::unordered_map<std::string, std::size_t> labels;
-		std::vector<Token> src;
+		std::vector<std::unique_ptr<Token>> src;
 		std::string error;
 
+		std::stack<std::unique_ptr<Token>> stack;
+
 		bool compile(std::string_view name, std::istream& in);
-		aas::Token next(std::istream& in, std::string_view filename, std::size_t& lineno, std::size_t& charno);
+		std::unique_ptr<Token> next(std::istream& in, std::string_view filename, std::size_t& lineno, std::size_t& charno);
+		int run();
+
+		void useStack();
+
+		inline void on(const std::string& id, std::function<int(Program&, std::size_t&)> cmd){
+			if(!id_dict[id]){
+				id_dict[id] = ids.size();
+				ids.push_back(id);
+			}
+
+			commands[id_dict[id]] = cmd;
+		}
+
+		inline void alias(const std::string& id, const std::string& alias){
+			if(!id_dict[id]){
+				id_dict[id] = ids.size();
+				ids.push_back(id);
+			}
+
+			id_dict[alias] = id_dict[id];
+		}
 	};
 }

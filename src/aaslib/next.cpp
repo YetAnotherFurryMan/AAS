@@ -15,14 +15,9 @@ static inline bool s_trim(std::istream& in, std::size_t& lineno, std::size_t& ch
 	return in.eof();
 }
 
-aas::Token aas::Program::next(std::istream& in, std::string_view filename, std::size_t& lineno, std::size_t& charno){
+std::unique_ptr<aas::Token> aas::Program::next(std::istream& in, std::string_view filename, std::size_t& lineno, std::size_t& charno){
 	if(s_trim(in, lineno, charno))
-		return (aas::Token){
-			.type = aas::TokenType::ENDOF,
-			.filename = filename,
-			.lineno = lineno,
-			.charno = charno
-		};
+		return std::make_unique<aas::Token>(aas::TokenType::ENDOF, filename, lineno, charno);
 
 	char c = in.peek();
 	if(c == '-' || (c >= '0' && c <= '9')){
@@ -37,7 +32,7 @@ aas::Token aas::Program::next(std::istream& in, std::string_view filename, std::
 		if(txt == "-"){
 			charno = cno;
 		} else {
-			return (aas::Number){filename, lineno, cno, std::atoi(txt.c_str())};
+			return std::make_unique<aas::Number>(filename, lineno, cno, std::atoi(txt.c_str()));
 		}
 	} else if(c == '_' || c == '.' || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z')){
 		std::string txt = "";
@@ -53,7 +48,7 @@ aas::Token aas::Program::next(std::istream& in, std::string_view filename, std::
 			ids.emplace_back(txt);
 		}
 
-		return (aas::Identifier){filename, lineno, cno, id_dict[txt]};
+		return std::make_unique<aas::Identifier>(filename, lineno, cno, id_dict[txt]);
 	} else if(c == '\''){
 		// Parse string (no escapes)
 		std::string txt = "";
@@ -74,7 +69,7 @@ aas::Token aas::Program::next(std::istream& in, std::string_view filename, std::
 		if(!in.eof()){
 			charno++;
 			in.get();
-			return (aas::String){filename, lineno, cno, txt};
+			return std::make_unique<aas::String>(filename, lineno, cno, txt);
 		}
 	} else if(c == '\"'){
 		// Parse string (no escapes)
@@ -128,12 +123,7 @@ aas::Token aas::Program::next(std::istream& in, std::string_view filename, std::
 							txt += c;
 						} break;
 						default:
-							return (aas::Token){
-								.type = aas::TokenType::ERROR,
-								.filename = filename,
-								.lineno = lineno,
-								.charno = cno
-							};
+							return std::make_unique<aas::Token>(aas::TokenType::ERROR, filename, lineno, cno);
 					}
 					
 					in.get();
@@ -153,15 +143,10 @@ aas::Token aas::Program::next(std::istream& in, std::string_view filename, std::
 		if(!in.eof()){
 			charno++;
 			in.get();
-			return (aas::FString){filename, lineno, cno, txt};
+			return std::make_unique<aas::FString>(filename, lineno, cno, txt);
 		}
 	}
 
 err:
-	return (aas::Token){
-		.type = aas::TokenType::ERROR,
-		.filename = filename,
-		.lineno = lineno,
-		.charno = charno
-	};
+	return std::make_unique<aas::Token>(aas::TokenType::ERROR, filename, lineno, charno);
 }
