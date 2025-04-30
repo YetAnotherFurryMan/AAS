@@ -5,5 +5,6 @@
 namespace aas::console{
 	void use(Program& prog);
 
-	int print(Program& prog, std::size_t&);
+	int print(Program& prog, std::size_t& pc);
+	int printv(Program& prog, std::size_t& pc);
 }

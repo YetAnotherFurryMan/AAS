@@ -1,0 +1,3 @@
+use console
+
+printv "Hello World\n"
