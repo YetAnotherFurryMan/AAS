@@ -71,6 +71,7 @@ int main(int argc, const char** argv){
 	file.close();
 
 	prog.useStack();
+	prog.useMath();
 	prog.on("use", createUseOp(true));
 	prog.on("import", createUseOp(false));
 

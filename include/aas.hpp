@@ -117,7 +117,7 @@ namespace aas{
 		{}
 	};
 
-	// TODO: Destructor?
+	// TODO: Destructor? std::shared_ptr?
 	struct Object: public Data{
 		std::string name;
 		void* object;
@@ -139,13 +139,14 @@ namespace aas{
 		std::vector<std::unique_ptr<Token>> src;
 		std::string error;
 
-		std::stack<std::unique_ptr<Data>> stack;
+		std::vector<std::unique_ptr<Data>> stack;
 
 		bool compile(std::string_view name, std::istream& in);
 		std::unique_ptr<Token> next(std::istream& in, std::string_view filename, std::size_t& lineno, std::size_t& charno);
 		int run();
 
 		void useStack();
+		void useMath();
 
 		inline void on(const std::string& id, std::function<int(Program&, std::size_t&)> cmd){
 			if(!id_dict[id]){
@@ -190,6 +191,28 @@ namespace aas{
 			} break;
 			default:
 				return std::make_unique<Data>(DataType::ERROR);
+		}
+	}
+
+	inline std::unique_ptr<Data> copy(Data* data){
+		switch(data->type){
+			case DataType::INTEGER:
+			{
+				Integer* i = dynamic_cast<Integer*>(data);
+				return std::make_unique<Integer>(i->value);
+			} break;
+			case DataType::TEXT:
+			{
+				Text* t = dynamic_cast<Text*>(data);
+				return std::make_unique<Text>(t->value);
+			} break;
+			case DataType::OBJECT:
+			{
+				Object* o = dynamic_cast<Object*>(data);
+				return std::make_unique<Object>(o->name, o->object);
+			} break;
+			default:
+				return std::make_unique<Data>(data->type);
 		}
 	}
 }

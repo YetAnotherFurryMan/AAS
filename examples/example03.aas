@@ -4,5 +4,8 @@ printv "What's your name? "
 
 scanl
 
-printv "Hello "
+push "Hello "
+add
+addv "\n"
+
 print

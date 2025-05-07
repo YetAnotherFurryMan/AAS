@@ -40,7 +40,7 @@ int aas::console::print(aas::Program& prog, std::size_t& pc){
 		return 1;
 	}
 
-	if(s_print(prog.stack.top().get())){
+	if(s_print(prog.stack.back().get())){
 		prog.error = "\"console.print\": Unprintable stack value: " + prog.src[pc]->strloc();
 		return 2;
 	}
