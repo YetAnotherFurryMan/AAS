@@ -3,7 +3,7 @@
 #include "aas.hpp"
 
 namespace aas::console{
-	void use(Program& prog);
+	void use(Program& prog, bool aliases = true);
 
 	int print(Program& prog, std::size_t& pc);
 	int printv(Program& prog, std::size_t& pc);

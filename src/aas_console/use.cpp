@@ -1,6 +1,6 @@
 #include <aas_console.hpp>
 
-void aas::console::use(aas::Program& prog){
+void aas::console::use(aas::Program& prog, bool aliases){
 	prog.on("console.print", aas::console::print);
 	prog.on("console.printv", aas::console::printv);
 
@@ -8,10 +8,12 @@ void aas::console::use(aas::Program& prog){
 	prog.on("console.scanl", aas::console::scanl);
 	prog.on("console.scani", aas::console::scani);
 
-	prog.alias("console.print", "print");
-	prog.alias("console.printv", "printv");
+	if(aliases){
+		prog.alias("console.print", "print");
+		prog.alias("console.printv", "printv");
 
-	prog.alias("console.scan", "scan");
-	prog.alias("console.scanl", "scanl");
-	prog.alias("console.scani", "scani");
+		prog.alias("console.scan", "scan");
+		prog.alias("console.scanl", "scanl");
+		prog.alias("console.scani", "scani");
+	}
 }

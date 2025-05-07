@@ -1,5 +1,5 @@
-use console
+import console
 
 push "Hello World\n"
 
-print
+console.print
