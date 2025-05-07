@@ -8,7 +8,7 @@ void aas::Program::useStack(){
 			return 1;
 		}
 		
-		prog.stack.emplace(prog.src[pc]->copy());
+		prog.stack.emplace(aas::toData(prog.src[pc].get()));
 		return 0;
 	});
 

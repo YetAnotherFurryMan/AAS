@@ -1,0 +1,8 @@
+use console
+
+printv "What's your name? "
+
+scanl
+
+printv "Hello "
+print

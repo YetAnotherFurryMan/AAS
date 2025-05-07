@@ -32,13 +32,11 @@ namespace aas{
 
 		virtual ~Token() = default;
 
-		virtual Token* copy() const {
-			return new Token(type, filename, lineno, charno);
-		}
-
 		inline std::string strloc(){
 			return "[" + std::to_string(lineno) + ":" + std::to_string(charno) + "]";
 		}
+
+		
 	};
 
 	struct Number: public Token{
@@ -49,10 +47,6 @@ namespace aas{
 			Token{TokenType::NUMBER, filename, lineno, charno},
 			value{value}
 		{}
-
-		Token* copy() const override {
-			return new Number(filename, lineno, charno, value);
-		}
 	};
 
 	struct String: public Token{
@@ -63,10 +57,6 @@ namespace aas{
 			Token{TokenType::STRING, filename, lineno, charno},
 			value{value}
 		{}
-
-		Token* copy() const override {
-			return new String(filename, lineno, charno, value);
-		}
 	};
 
 	struct FString: public Token{
@@ -77,10 +67,6 @@ namespace aas{
 			Token{TokenType::FSTRING, filename, lineno, charno},
 			value{value}
 		{}
-
-		Token* copy() const override {
-			return new FString(filename, lineno, charno, value);
-		}
 	};
 
 	struct Identifier: public Token{
@@ -91,10 +77,57 @@ namespace aas{
 			Token{TokenType::IDENTIFIER, filename, lineno, charno},
 			index{index}
 		{}
+	};
 
-		Token* copy() const override {
-			return new Identifier(filename, lineno, charno, index);
-		}
+	enum class DataType{
+		ERROR = 0,
+		INTEGER,
+		TEXT,
+		OBJECT
+	};
+
+	struct Data{
+		DataType type;
+
+		Data() = default;
+		Data(DataType type):
+			type{type}
+		{}
+
+		virtual ~Data() = default;
+	};
+
+	struct Integer: public Data{
+		int64_t value;
+
+		Integer() = default;
+		Integer(int64_t value):
+			Data{DataType::INTEGER},
+			value{value}
+		{}
+	};
+
+	struct Text: public Data{
+		std::string value;
+
+		Text() = default;
+		Text(const std::string& value):
+			Data{DataType::TEXT},
+			value{value}
+		{}
+	};
+
+	// TODO: Destructor?
+	struct Object: public Data{
+		std::string name;
+		void* object;
+
+		Object() = default;
+		Object(const std::string& name, void* object):
+			Data{DataType::OBJECT},
+			name{name},
+			object{object}
+		{}
 	};
 
 	// TODO: Create struct Data for.. data
@@ -106,7 +139,7 @@ namespace aas{
 		std::vector<std::unique_ptr<Token>> src;
 		std::string error;
 
-		std::stack<std::unique_ptr<Token>> stack;
+		std::stack<std::unique_ptr<Data>> stack;
 
 		bool compile(std::string_view name, std::istream& in);
 		std::unique_ptr<Token> next(std::istream& in, std::string_view filename, std::size_t& lineno, std::size_t& charno);
@@ -132,4 +165,31 @@ namespace aas{
 			id_dict[alias] = id_dict[id];
 		}
 	};
+
+	inline std::unique_ptr<Data> toData(Token* tok){
+		switch(tok->type){
+			case TokenType::NUMBER:
+			{
+				Number* num = dynamic_cast<Number*>(tok);
+				return std::make_unique<Integer>(num->value);
+			} break;
+			case TokenType::STRING:
+			{
+				String* str = dynamic_cast<String*>(tok);
+				return std::make_unique<Text>(str->value);
+			} break;
+			case TokenType::FSTRING:
+			{
+				FString* fstr = dynamic_cast<FString*>(tok);
+				return std::make_unique<Text>(fstr->value);
+			} break;
+			case TokenType::IDENTIFIER:
+			{
+				Identifier* id = dynamic_cast<Identifier*>(tok);
+				return std::make_unique<Integer>(id->index);
+			} break;
+			default:
+				return std::make_unique<Data>(DataType::ERROR);
+		}
+	}
 }

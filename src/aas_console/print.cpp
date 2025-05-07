@@ -1,26 +1,21 @@
 #include <aas_console.hpp>
 
-static int s_print(aas::Program& prog, aas::Token* tok){
-	switch(tok->type){
-		case aas::TokenType::NUMBER:
+static int s_print(aas::Data* data){
+	switch(data->type){
+		case aas::DataType::INTEGER:
 		{
-			aas::Number* num = dynamic_cast<aas::Number*>(tok);
-			std::cout << num->value;
+			aas::Integer* i = dynamic_cast<aas::Integer*>(data);
+			std::cout << i->value;
 		} break;
-		case aas::TokenType::STRING:
+		case aas::DataType::TEXT:
 		{
-			aas::String* str = dynamic_cast<aas::String*>(tok);
-			std::cout << str->value;
+			aas::Text* t = dynamic_cast<aas::Text*>(data);
+			std::cout << t->value;
 		} break;
-		case aas::TokenType::FSTRING:
+		case aas::DataType::OBJECT:
 		{
-			aas::FString* fstr = dynamic_cast<aas::FString*>(tok);
-			std::cout << fstr->value;
-		} break;
-		case aas::TokenType::IDENTIFIER:
-		{
-			aas::Identifier* id = dynamic_cast<aas::Identifier*>(tok);
-			std::cout << prog.ids[id->index];
+			aas::Object* o = dynamic_cast<aas::Object*>(data);
+			std::cout << "[" << o->name << ": " << o->object << "]";
 		} break;
 		default:
 			return 1;
@@ -29,13 +24,23 @@ static int s_print(aas::Program& prog, aas::Token* tok){
 	return 0;
 }
 
+inline int s_print(aas::Program& prog, aas::Token* tok){
+	if(tok->type == aas::TokenType::IDENTIFIER){
+		aas::Identifier* id = dynamic_cast<aas::Identifier*>(tok);
+		std::cout << "[" << id->index << ": " << prog.ids[id->index] << "]";
+	}
+
+	auto p = aas::toData(tok);
+	return s_print(p.get());
+}
+
 int aas::console::print(aas::Program& prog, std::size_t& pc){
 	if(prog.stack.size() <= 0){
 		prog.error = "\"console.print\": Stack is empty: " + prog.src[pc]->strloc();
 		return 1;
 	}
 
-	if(s_print(prog, prog.stack.top().get())){
+	if(s_print(prog.stack.top().get())){
 		prog.error = "\"console.print\": Unprintable stack value: " + prog.src[pc]->strloc();
 		return 2;
 	}
