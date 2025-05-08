@@ -1,0 +1,125 @@
+# Asset Assembler Script (AAS) Specification
+
+In this document I will describe how Asset Assembler Script (later AAS) is processed and present basic instructions (the built-in ones).
+Also, I will mention `use` and `import` instructions, but these are special extensions implemented in the executable (aas), not in the language library (aaslib).
+For documentation of specific modules (like `console`) see other documents in this directory.
+
+## Parser
+
+There is no actual parser for AAS, the syntax is made in such way that makes it possible to use lexer only approach.
+That means, there is no AST, only stream of tokens. The code is executed from top to bottom and the index of currently processed token is stored in a variable (Program Counter - PC).
+The PC can be modified by commands, so the control-flow can be non-linear (loops, etc.) and some tokens can be considered data.
+
+These are currently possible token types: number, string, formatted string and identifier.
+1. A number is a token that is a valid integer and satisfies the following regex: `-?[0-9]+`
+2. A string is a collection of any bytes between two single quotes, it does not support escaping.
+3. A formatted string is same as a string but surrounded by double quotes instead. It supports escaping with the slash `\`. The sequences are similar to the C's ones, but it supports only one-byte hex-encoded sequences (e.g. `\xAA` or `\x0a`).
+4. An identifier is a sequence of alphanumeric characters, dots, and underscores. Every identifier is translated into a unique number, that will be important later.
+
+## Execution process
+
+So, firstly, the code is tokenized and the commands are assigned to corresponding identifiers (by its index).
+These two actions can be performed in any order, because if an identifier does not have an index yet, it will be created at when needed.
+Then the program can be executed, the PC is created (with the value of 0) and the flow is passed to the command assigned to the first identifier.
+The command can modify the state of the program (including the stack) and the PC if needed.
+When the command returns, the PC is incremented and the cycle goes on. Only the identifiers can be executed, so when PC points at string, formatted string or number the program fails.
+The same happens when PC is pointing at an identifier with no command assigned, for obvious reasons.
+
+## Stack datatypes
+
+The tokens can be numbers, strings, formatted strings and identifiers.
+The data types are simpler, for now there are only: integer, text, and object.
+
+| Token Type       | Data Type |
+| :--------------: | :-------: |
+| Number           | Integer   |
+| String           | Text      |
+| Formatted String | Text      |
+| Identifier       | Integer   |
+
+## Built-in commands
+
+The commands are divided into categories: stack, and math. They can take arguments from code (as following tokens) or from the stack.
+The functions of some commands (like `push` or `pop`) can be easily guessed along with what data they operate on, however some have variants (one that operates with data on the stack and one that operate on both stack and source).
+For this reason, a command with no suffix (like `add`) operates only on stack and a command with suffix `v` (like `addv`) takes a following token as the second operand.
+
+Example: These two peaces of code are equivalent.
+
+``` AAS
+push 2
+push 1
+add
+```
+
+``` AAS
+push 1
+addv 2
+```
+
+### Stack
+
+`push [ANY]`
+
+The `push` command takes one argument from code and pushes it as data to the stack.
+
+`pop`
+
+The `pop` command removes top-most element from the stack.
+
+`dup`
+
+The `dup` duplicates the top-most element on the stack.
+
+`swap`
+
+The `swap` changes the order of the two top-most elements on the stack.
+
+`rot`
+
+The `rot` rotates the three top-most elements (moves the top-most under the third).
+
+### Math
+
+`add`
+`addv [INT]`
+
+The `add` adds two operands.
+
+`sub`
+`subv [INT]`
+
+The `sub` subtracts two operands.
+
+`mul`
+`mulv [INT]`
+
+The `mul` multiplies two operands.
+
+`div`
+`divv [INT]`
+
+The `div` divides two operands.
+
+`mod`
+`modv [INT]`
+
+The `mod` returns the reminder of division of two operands on the stack.
+
+`cat`
+`catv [INT]`
+`catv [TXT]`
+
+The `cat` command concatenates operands. The supported types are text and integer, but it always returns text on the stack.
+
+### Extension
+
+`use [ID]`
+`use [STR]`
+
+The `use` command loads an external module and assigns its commands with aliases.
+For example `use console` will assign both `console.print` and `print`.
+
+`import [ID]`
+`import [STR]`
+
+The `import` command does the same as `use`, but does not assign aliases (in the example above the `print` would not be assigned).
