@@ -1,0 +1,66 @@
+use console
+
+printv "A: "
+scani
+
+printv "B: "
+scani
+
+dup rot swap
+dup rot
+
+add
+push "A + B = "
+cat
+catv "\n"
+print
+
+pop
+swap
+
+dup rot swap
+dup rot 
+
+sub
+push "A - B = "
+cat
+catv "\n"
+print
+
+pop
+swap
+
+dup rot swap
+dup rot 
+
+mul
+push "A * B = "
+cat
+catv "\n"
+print
+
+pop
+swap
+
+dup rot swap
+dup rot 
+
+div
+push "A / B = "
+cat
+catv "\n"
+print
+
+pop
+swap
+
+dup rot swap
+dup rot 
+
+mod
+push "A % B = "
+cat
+catv "\n"
+print
+
+pop pop pop

@@ -5,7 +5,7 @@ printv "What's your name? "
 scanl
 
 push "Hello "
-add
-addv "\n"
+cat
+catv "\n"
 
 print
