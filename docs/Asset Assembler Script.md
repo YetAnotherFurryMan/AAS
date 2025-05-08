@@ -39,7 +39,7 @@ The data types are simpler, for now there are only: integer, text, and object.
 
 ## Built-in commands
 
-The commands are divided into categories: stack, and math. They can take arguments from code (as following tokens) or from the stack.
+The commands are divided into categories: stack, types, and math. They can take arguments from code (as following tokens) or from the stack.
 The functions of some commands (like `push` or `pop`) can be easily guessed along with what data they operate on, however some have variants (one that operates with data on the stack and one that operate on both stack and source).
 For this reason, a command with no suffix (like `add`) operates only on stack and a command with suffix `v` (like `addv`) takes a following token as the second operand.
 
@@ -77,6 +77,16 @@ The `swap` changes the order of the two top-most elements on the stack.
 `rot`
 
 The `rot` rotates the three top-most elements (moves the top-most under the third).
+
+### Types
+
+`text`
+
+Converts whatever lays on the stack to text.
+
+`int`
+
+Converts whatever lays on the stack to integer (with value of 0 on error).
 
 ### Math
 

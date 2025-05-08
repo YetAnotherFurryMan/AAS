@@ -129,7 +129,6 @@ namespace aas{
 		{}
 	};
 
-	// TODO: Create struct Data for.. data
 	struct Program{
 		std::vector<std::string> ids = {""};
 		std::unordered_map<std::string, std::size_t> id_dict;
@@ -146,6 +145,7 @@ namespace aas{
 
 		void useStack();
 		void useMath();
+		void useTypes();
 
 		inline void on(const std::string& id, std::function<int(Program&, std::size_t&)> cmd){
 			if(!id_dict[id]){
