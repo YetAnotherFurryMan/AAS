@@ -7,10 +7,11 @@ printv "B: "
 scani
 
 dup rot swap
-dup rot
+dup rot swap
 
-add
 push "A + B = "
+rot
+add
 cat
 catv "\n"
 print
@@ -19,10 +20,11 @@ pop
 swap
 
 dup rot swap
-dup rot 
+dup rot swap 
 
-sub
 push "A - B = "
+rot
+sub
 cat
 catv "\n"
 print
@@ -31,10 +33,11 @@ pop
 swap
 
 dup rot swap
-dup rot 
+dup rot swap
 
-mul
 push "A * B = "
+rot
+mul
 cat
 catv "\n"
 print
@@ -43,10 +46,11 @@ pop
 swap
 
 dup rot swap
-dup rot 
+dup rot swap
 
-div
 push "A / B = "
+rot
+div
 cat
 catv "\n"
 print
@@ -55,10 +59,11 @@ pop
 swap
 
 dup rot swap
-dup rot 
+dup rot swap
 
-mod
 push "A % B = "
+rot
+mod
 cat
 catv "\n"
 print

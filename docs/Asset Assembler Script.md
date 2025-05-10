@@ -10,11 +10,12 @@ There is no actual parser for AAS, the syntax is made in such way that makes it 
 That means, there is no AST, only stream of tokens. The code is executed from top to bottom and the index of currently processed token is stored in a variable (Program Counter - PC).
 The PC can be modified by commands, so the control-flow can be non-linear (loops, etc.) and some tokens can be considered data.
 
-These are currently possible token types: number, string, formatted string and identifier.
+These are currently possible token types: number, string, formatted string, identifier and stack reference.
 1. A number is a token that is a valid integer and satisfies the following regex: `-?[0-9]+`
 2. A string is a collection of any bytes between two single quotes, it does not support escaping.
 3. A formatted string is same as a string but surrounded by double quotes instead. It supports escaping with the slash `\`. The sequences are similar to the C's ones, but it supports only one-byte hex-encoded sequences (e.g. `\xAA` or `\x0a`).
 4. An identifier is a sequence of alphanumeric characters, dots, and underscores. Every identifier is translated into a unique number, that will be important later.
+5. A stack reference is a positive integer `n` that refers to `n`th element on the stack (counting from the top), it satisfies the following regex: `$[0-9]*`, where in case of `$` it is equivalent to `$0` (the top).
 
 ## Execution process
 
@@ -36,10 +37,11 @@ The data types are simpler, for now there are only: integer, text, and object.
 | String           | Text      |
 | Formatted String | Text      |
 | Identifier       | Integer   |
+| Stack Reference  | _depends_ |
 
 ## Built-in commands
 
-The commands are divided into categories: stack, types, and math. They can take arguments from code (as following tokens) or from the stack.
+The commands are divided into categories: stack, variables, types, and math. They can take arguments from code (as following tokens) or from the stack.
 The functions of some commands (like `push` or `pop`) can be easily guessed along with what data they operate on, however some have variants (one that operates with data on the stack and one that operate on both stack and source).
 For this reason, a command with no suffix (like `add`) operates only on stack and a command with suffix `v` (like `addv`) takes a following token as the second operand.
 
@@ -77,6 +79,20 @@ The `swap` changes the order of the two top-most elements on the stack.
 `rot`
 
 The `rot` rotates the three top-most elements (moves the top-most under the third).
+
+### Variables
+
+`set [ID] [ANY]`
+`set [STR] [ANY]`
+`set [FST] [ANY]`
+
+Sets the variable (first argument) to the given value (the second one).
+
+`get [ID]`
+`get [STR]`
+`get [FST]`
+
+Pushes the value of the given variable on the stack.
 
 ### Types
 

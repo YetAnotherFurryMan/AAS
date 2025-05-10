@@ -2,9 +2,9 @@ use console
 
 printv "What's your name? "
 
+push "Hello "
 scanl
 
-push "Hello "
 cat
 catv "\n"
 

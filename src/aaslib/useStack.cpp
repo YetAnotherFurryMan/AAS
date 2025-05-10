@@ -8,7 +8,11 @@ void aas::Program::useStack(){
 			return 1;
 		}
 		
-		prog.stack.emplace_back(aas::toData(prog.src[pc].get()));
+		std::unique_ptr<aas::Data> data = aas::toData(prog, prog.src[pc].get());
+		if(data->type == aas::DataType::ERROR)
+			return 2;
+
+		prog.stack.push_back(std::move(data));
 		return 0;
 	});
 

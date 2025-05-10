@@ -30,7 +30,7 @@ inline int s_print(aas::Program& prog, aas::Token* tok){
 		std::cout << "[" << id->index << ": " << prog.ids[id->index] << "]";
 	}
 
-	auto p = aas::toData(tok);
+	std::unique_ptr<aas::Data> p = aas::toData(prog, tok);
 	return s_print(p.get());
 }
 

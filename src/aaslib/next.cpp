@@ -20,7 +20,7 @@ std::unique_ptr<aas::Token> aas::Program::next(std::istream& in, std::string_vie
 		return std::make_unique<aas::Token>(aas::TokenType::ENDOF, filename, lineno, charno);
 
 	char c = in.peek();
-	if(c == '-' || (c >= '0' && c <= '9')){
+	if(c == '-' || c == '$' || (c >= '0' && c <= '9')){
 		std::string txt = "";
 		std::size_t cno = charno;
 		do{
@@ -31,8 +31,10 @@ std::unique_ptr<aas::Token> aas::Program::next(std::istream& in, std::string_vie
 
 		if(txt == "-"){
 			charno = cno;
+		} else if(txt[0] == '$'){
+			return std::make_unique<aas::StackRef>(filename, lineno, cno, (txt == "$" ? 0 : std::stoul(txt.c_str() + 1)) + 1);
 		} else {
-			return std::make_unique<aas::Number>(filename, lineno, cno, std::atoi(txt.c_str()));
+			return std::make_unique<aas::Number>(filename, lineno, cno, std::stol(txt.c_str()));
 		}
 	} else if(c == '_' || c == '.' || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z')){
 		std::string txt = "";

@@ -71,6 +71,7 @@ int main(int argc, const char** argv){
 	file.close();
 
 	prog.useStack();
+	prog.useVars();
 	prog.useTypes();
 	prog.useMath();
 	prog.on("use", createUseOp(true));

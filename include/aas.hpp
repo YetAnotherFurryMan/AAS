@@ -15,7 +15,8 @@ namespace aas{
 		NUMBER,
 		STRING,
 		FSTRING,
-		IDENTIFIER
+		IDENTIFIER,
+		STACKREF
 	};
 
 	struct Token{
@@ -74,6 +75,16 @@ namespace aas{
 		Identifier() = default;
 		Identifier(std::string_view filename, std::size_t lineno, std::size_t charno, std::size_t index):
 			Token{TokenType::IDENTIFIER, filename, lineno, charno},
+			index{index}
+		{}
+	};
+
+	struct StackRef: public Token{
+		std::size_t index;
+
+		StackRef() = default;
+		StackRef(std::string_view filename, std::size_t lineno, std::size_t charno, std::size_t index):
+			Token{TokenType::STACKREF, filename, lineno, charno},
 			index{index}
 		{}
 	};
@@ -138,14 +149,16 @@ namespace aas{
 		std::string error;
 
 		std::vector<std::unique_ptr<Data>> stack;
+		std::unordered_map<std::string, std::unique_ptr<Data>> vars;
 
 		bool compile(std::string_view name, std::istream& in);
 		std::unique_ptr<Token> next(std::istream& in, std::string_view filename, std::size_t& lineno, std::size_t& charno);
 		int run();
 
 		void useStack();
-		void useMath();
+		void useVars();
 		void useTypes();
+		void useMath();
 
 		inline void on(const std::string& id, std::function<int(Program&, std::size_t&)> cmd){
 			if(!id_dict[id]){
@@ -166,7 +179,29 @@ namespace aas{
 		}
 	};
 
-	inline std::unique_ptr<Data> toData(Token* tok){
+	inline std::unique_ptr<Data> copy(Data* data){
+		switch(data->type){
+			case DataType::INTEGER:
+			{
+				Integer* i = dynamic_cast<Integer*>(data);
+				return std::make_unique<Integer>(i->value);
+			} break;
+			case DataType::TEXT:
+			{
+				Text* t = dynamic_cast<Text*>(data);
+				return std::make_unique<Text>(t->value);
+			} break;
+			case DataType::OBJECT:
+			{
+				Object* o = dynamic_cast<Object*>(data);
+				return std::make_unique<Object>(o->name, o->object);
+			} break;
+			default:
+				return std::make_unique<Data>(data->type);
+		}
+	}
+
+	inline std::unique_ptr<Data> toData(Program& prog, Token* tok){
 		switch(tok->type){
 			case TokenType::NUMBER:
 			{
@@ -188,30 +223,19 @@ namespace aas{
 				Identifier* id = dynamic_cast<Identifier*>(tok);
 				return std::make_unique<Integer>(id->index);
 			} break;
-			default:
-				return std::make_unique<Data>(DataType::ERROR);
-		}
-	}
+			case TokenType::STACKREF:
+			{
+				StackRef* sr = dynamic_cast<StackRef*>(tok);
+				if(prog.stack.size() < sr->index){
+					prog.error = "Failed to resolve stack reference: " + tok->strloc();
+					return std::make_unique<Data>(DataType::ERROR);
+				}
 
-	inline std::unique_ptr<Data> copy(Data* data){
-		switch(data->type){
-			case DataType::INTEGER:
-			{
-				Integer* i = dynamic_cast<Integer*>(data);
-				return std::make_unique<Integer>(i->value);
-			} break;
-			case DataType::TEXT:
-			{
-				Text* t = dynamic_cast<Text*>(data);
-				return std::make_unique<Text>(t->value);
-			} break;
-			case DataType::OBJECT:
-			{
-				Object* o = dynamic_cast<Object*>(data);
-				return std::make_unique<Object>(o->name, o->object);
-			} break;
+				return copy(prog.stack[prog.stack.size() - sr->index].get());
+			}
 			default:
-				return std::make_unique<Data>(data->type);
+				prog.error = "Failed to convert token to data: " + tok->strloc();
+				return std::make_unique<Data>(DataType::ERROR);
 		}
 	}
 }

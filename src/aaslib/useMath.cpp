@@ -94,7 +94,7 @@ inline bool is_of_type(aas::DataType type, aas::DataType* dts, std::size_t count
 			return 4;                                                                                         \
 		}                                                                                                     \
                                                                                                               \
-		prog.stack.emplace_back(s_##OP(a.get(), b.get()));                                                    \
+		prog.stack.emplace_back(s_##OP(b.get(), a.get()));                                                    \
                                                                                                               \
 		return 0;                                                                                             \
 	});
@@ -109,24 +109,26 @@ inline bool is_of_type(aas::DataType type, aas::DataType* dts, std::size_t count
 		pc++;                                                                                                    \
 		if(pc >= prog.src.size()){                                                                               \
 			prog.error = "\""#OP"\": Expected a value, but got nothing: " + prog.src[pc - 1]->strloc();          \
-			return 1;                                                                                            \
+			return 2;                                                                                            \
 		}                                                                                                        \
                                                                                                                  \
 		std::unique_ptr<aas::Data> a = std::move(prog.stack.back());                                             \
 		prog.stack.pop_back();                                                                                   \
                                                                                                                  \
-		std::unique_ptr<aas::Data> b = aas::toData(prog.src[pc].get());                                          \
+		std::unique_ptr<aas::Data> b = aas::toData(prog, prog.src[pc].get());                                    \
+		if(b->type == aas::DataType::ERROR)                                                                      \
+			return 3;                                                                                            \
                                                                                                                  \
 		aas::DataType dts[] = {DT};																			     \
 		constexpr std::size_t dt_count = sizeof(dts) / sizeof(aas::DataType);                                    \
 		if(is_of_type(a->type, dts, dt_count)){                                                                  \
 			prog.error = "\""#OP"\": Bad type of the first element of the stack: " + prog.src[pc - 1]->strloc(); \
-			return 3;                                                                                            \
+			return 4;                                                                                            \
 		}                                                                                                        \
                                                                                                                  \
 		if(is_of_type(b->type, dts, dt_count)){                                                                  \
 			prog.error = "\""#OP"\": Bad type of the argument: " + prog.src[pc]->strloc();                       \
-			return 3;                                                                                            \
+			return 5;                                                                                            \
 		}                                                                                                        \
                                                                                                                  \
 		prog.stack.emplace_back(s_##OP(a.get(), b.get()));                                                       \
