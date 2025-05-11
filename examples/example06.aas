@@ -1,0 +1,15 @@
+use console
+
+@L1
+
+push 'L1: '
+label L1
+cat
+catv "\nL2: "
+label L2
+cat
+catv "\n"
+
+@L2
+
+print pop

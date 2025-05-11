@@ -74,6 +74,7 @@ int main(int argc, const char** argv){
 	prog.useVars();
 	prog.useTypes();
 	prog.useMath();
+	prog.useFlow();
 	prog.on("use", createUseOp(true));
 	prog.on("import", createUseOp(false));
 

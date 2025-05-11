@@ -10,12 +10,13 @@ There is no actual parser for AAS, the syntax is made in such way that makes it 
 That means, there is no AST, only stream of tokens. The code is executed from top to bottom and the index of currently processed token is stored in a variable (Program Counter - PC).
 The PC can be modified by commands, so the control-flow can be non-linear (loops, etc.) and some tokens can be considered data.
 
-These are currently possible token types: number, string, formatted string, identifier and stack reference.
+These are currently possible token types: number, string, formatted string, identifier, stack reference and label.
 1. A number is a token that is a valid integer and satisfies the following regex: `-?[0-9]+`
 2. A string is a collection of any bytes between two single quotes, it does not support escaping.
 3. A formatted string is same as a string but surrounded by double quotes instead. It supports escaping with the slash `\`. The sequences are similar to the C's ones, but it supports only one-byte hex-encoded sequences (e.g. `\xAA` or `\x0a`).
 4. An identifier is a sequence of alphanumeric characters, dots, and underscores. Every identifier is translated into a unique number, that will be important later.
 5. A stack reference is a positive integer `n` that refers to `n`th element on the stack (counting from the top), it satisfies the following regex: `$[0-9]*`, where in case of `$` it is equivalent to `$0` (the top).
+6. A label is actually an identifier prefixed by `@`, it is automatically mapped to its PC.
 
 ## Execution process
 
@@ -28,8 +29,7 @@ The same happens when PC is pointing at an identifier with no command assigned, 
 
 ## Stack datatypes
 
-The tokens can be numbers, strings, formatted strings and identifiers.
-The data types are simpler, for now there are only: integer, text, and object.
+The data types are simpler than token types, for now there are only: integer, text, and object.
 
 | Token Type       | Data Type |
 | :--------------: | :-------: |
@@ -38,10 +38,11 @@ The data types are simpler, for now there are only: integer, text, and object.
 | Formatted String | Text      |
 | Identifier       | Integer   |
 | Stack Reference  | _depends_ |
+| Label            | Integer   |
 
 ## Built-in commands
 
-The commands are divided into categories: stack, variables, types, and math. They can take arguments from code (as following tokens) or from the stack.
+The commands are divided into categories: stack, variables, types, math, and flow. They can take arguments from code (as following tokens) or from the stack.
 The functions of some commands (like `push` or `pop`) can be easily guessed along with what data they operate on, however some have variants (one that operates with data on the stack and one that operate on both stack and source).
 For this reason, a command with no suffix (like `add`) operates only on stack and a command with suffix `v` (like `addv`) takes a following token as the second operand.
 
@@ -56,6 +57,28 @@ add
 ``` AAS
 push 1
 addv 2
+```
+
+Also, some flow commands may depend on the stack, so the `z` suffix means that the action will be performed only when the top of the stack is integer equal to 0.
+
+Example: The first sample will print nothing, while the second will print "Hello World!" and a new line character.
+
+``` AAS
+use console
+
+push 1
+goto Label
+printv "Hello World!\n"
+@Label
+```
+
+``` AAS
+use console
+
+push 1
+gotoz Label
+printv "Hello World\n"
+@Label
 ```
 
 ### Stack
@@ -98,11 +121,11 @@ Pushes the value of the given variable on the stack.
 
 `text`
 
-Converts whatever lays on the stack to text.
+Converts whatever lies on the stack to text.
 
 `int`
 
-Converts whatever lays on the stack to integer (with value of 0 on error).
+Converts whatever lies on the stack to integer (with value of 0 on error).
 
 ### Math
 
@@ -136,6 +159,31 @@ The `mod` returns the reminder of division of two operands on the stack.
 `catv [TXT]`
 
 The `cat` command concatenates operands. The supported types are text and integer, but it always returns text on the stack.
+
+### Flow
+
+`label [ID]`
+
+Pushes the PC assigned to the label with the given identifier.
+
+`jump [INT]`
+`jumpz [INT]`
+
+Sets the PC to given value.
+
+`goto [ID]`
+`gotoz [ID]`
+
+Sets the PC to the one assigned to the label with the given identifier.
+
+`call [ID]`
+`callz [ID]`
+
+Same as `goto`, but also pushes the current PC on the stack.
+
+`ret`
+
+Changes PC to the one on the stack (pops the value).
 
 ### Extension
 

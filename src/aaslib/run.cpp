@@ -4,6 +4,9 @@ int aas::Program::run(){
 	int state = 0;
 
 	for(std::size_t pc = 0; pc < src.size() && state == 0; pc++){
+		if(src[pc]->type == aas::TokenType::LABEL)
+			continue;
+
 		aas::Identifier* id = dynamic_cast<aas::Identifier*>(src[pc].get());
 
 		if(!id){

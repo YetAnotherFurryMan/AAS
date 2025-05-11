@@ -15,7 +15,7 @@ static inline bool s_trim(std::istream& in, std::size_t& lineno, std::size_t& ch
 	return in.eof();
 }
 
-std::unique_ptr<aas::Token> aas::Program::next(std::istream& in, std::string_view filename, std::size_t& lineno, std::size_t& charno){
+std::unique_ptr<aas::Token> aas::Program::next(std::istream& in, std::string_view filename, std::size_t& lineno, std::size_t& charno, std::size_t pc){
 	if(s_trim(in, lineno, charno))
 		return std::make_unique<aas::Token>(aas::TokenType::ENDOF, filename, lineno, charno);
 
@@ -36,18 +36,30 @@ std::unique_ptr<aas::Token> aas::Program::next(std::istream& in, std::string_vie
 		} else {
 			return std::make_unique<aas::Number>(filename, lineno, cno, std::stol(txt.c_str()));
 		}
-	} else if(c == '_' || c == '.' || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z')){
+	} else if(c == '@' || c == '_' || c == '.' || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z')){
 		std::string txt = "";
 		std::size_t cno = charno;
+		bool label = c == '@';
 		do{
 			charno++;
 			txt += in.get();
 			c = in.peek();
 		} while(c == '_' || c == '.' || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9'));
 
+		if(label)
+			txt = txt.substr(1);
+
+		if(txt.empty())
+			return std::make_unique<aas::Number>(filename, lineno, cno, pc);
+
 		if(!id_dict[txt]){
 			id_dict[txt] = ids.size();
 			ids.emplace_back(txt);
+		}
+
+		if(label){
+			labels[id_dict[txt]] = pc;
+			return std::make_unique<aas::Label>(filename, lineno, cno, id_dict[txt]);
 		}
 
 		return std::make_unique<aas::Identifier>(filename, lineno, cno, id_dict[txt]);
@@ -55,6 +67,7 @@ std::unique_ptr<aas::Token> aas::Program::next(std::istream& in, std::string_vie
 		// Parse string (no escapes)
 		std::string txt = "";
 		std::size_t cno = charno;
+		in.get();
 		charno++;
 		c = in.peek();
 		while(c != '\'' && !in.eof()){

@@ -16,7 +16,8 @@ namespace aas{
 		STRING,
 		FSTRING,
 		IDENTIFIER,
-		STACKREF
+		STACKREF,
+		LABEL
 	};
 
 	struct Token{
@@ -89,6 +90,16 @@ namespace aas{
 		{}
 	};
 
+	struct Label: public Token{
+		std::size_t index;
+
+		Label() = default;
+		Label(std::string_view filename, std::size_t lineno, std::size_t charno, std::size_t index):
+			Token{TokenType::LABEL, filename, lineno, charno},
+			index{index}
+		{}
+	};
+
 	enum class DataType{
 		ERROR = 0,
 		INTEGER,
@@ -144,7 +155,7 @@ namespace aas{
 		std::vector<std::string> ids = {""};
 		std::unordered_map<std::string, std::size_t> id_dict;
 		std::unordered_map<std::size_t, std::function<int(Program&, std::size_t&)>> commands;
-		std::unordered_map<std::string, std::size_t> labels;
+		std::unordered_map<std::size_t, std::size_t> labels;
 		std::vector<std::unique_ptr<Token>> src;
 		std::string error;
 
@@ -152,13 +163,14 @@ namespace aas{
 		std::unordered_map<std::string, std::unique_ptr<Data>> vars;
 
 		bool compile(std::string_view name, std::istream& in);
-		std::unique_ptr<Token> next(std::istream& in, std::string_view filename, std::size_t& lineno, std::size_t& charno);
+		std::unique_ptr<Token> next(std::istream& in, std::string_view filename, std::size_t& lineno, std::size_t& charno, std::size_t pc);
 		int run();
 
 		void useStack();
 		void useVars();
 		void useTypes();
 		void useMath();
+		void useFlow();
 
 		inline void on(const std::string& id, std::function<int(Program&, std::size_t&)> cmd){
 			if(!id_dict[id]){
@@ -232,7 +244,12 @@ namespace aas{
 				}
 
 				return copy(prog.stack[prog.stack.size() - sr->index].get());
-			}
+			} break;
+			case TokenType::LABEL:
+			{
+				Label* label = dynamic_cast<Label*>(tok);
+				return std::make_unique<Integer>(label->index);
+			} break;
 			default:
 				prog.error = "Failed to convert token to data: " + tok->strloc();
 				return std::make_unique<Data>(DataType::ERROR);

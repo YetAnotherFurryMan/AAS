@@ -1,0 +1,15 @@
+use console
+
+printv 'Write 1 or 0: '
+scani
+
+gotoz Zero
+
+@One
+
+printv '1'
+
+goto One
+
+@Zero
+printv "0\n"
