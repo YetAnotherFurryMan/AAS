@@ -1,0 +1,220 @@
+# This example generates the Rule 110 with given number of lines.
+
+use console
+
+# Get the number of lines from user and save it in a variable.
+
+printv 'Numer of lines: '
+scani
+
+set nol $
+pop
+
+# Get the number of columns.
+
+printv 'Number of columns: '
+scani
+
+set noc $
+pop
+
+# Function definitions go there
+
+goto EndOfFunctions
+
+@PrintLine
+	get noc
+	set i $
+	pop
+
+	@PrintLine.Loop
+
+	get i
+
+	dup text
+	get $
+
+	gotoz PrintLine.Loop.L1
+	printv '#'
+	goto PrintLine.Loop.L2
+	@PrintLine.Loop.L1
+	printv ' '
+	@PrintLine.Loop.L2
+
+	pop
+
+	subv 1
+	set i $
+
+	gotoz PrintLine.Loop.break
+	goto PrintLine.Loop
+	@PrintLine.Loop.break
+
+	printv "\n"
+	ret
+
+@Update0
+	get i
+	text
+	get $
+	dup
+	callz Update00
+	subv 1
+	callz Update.1
+	pop
+	ret
+
+@Update00
+	get i
+	subv 1
+	text
+	get $
+	dup
+	callz Update.0
+	subv 1
+	callz Update.1
+	pop
+	ret
+
+@Update1
+	get i
+	text
+	get $
+	dup
+	callz Update10
+	subv 1
+	callz Update11
+	pop
+	ret
+
+@Update10
+	get i
+	subv 1
+	text
+	get $
+	dup
+	callz Update.0
+	subv 1
+	callz Update.1
+	pop
+	ret
+
+@Update11
+	get i
+	subv 1
+	text
+	get $
+	dup
+	callz Update.1
+	subv 1
+	callz Update.0
+	pop
+	ret
+
+@Update.0
+	get i
+	catv '~'
+	set $ 0
+	pop
+	ret
+
+@Update.1
+	get i
+	catv '~'
+	set $ 1
+	pop
+	ret
+
+@Update
+	get noc
+	set i $
+	pop
+
+	@Update.Loop1
+
+	get i
+
+	dup
+	addv 1
+	text
+	get $
+	dup
+	callz Update0
+	subv 1
+	callz Update1
+	pop
+
+	subv 1
+	set i $
+
+	gotoz Update.Loop1.break
+	goto Update.Loop1
+	@Update.Loop1.break
+
+	get noc
+	set i $
+	pop
+
+	@Update.Loop2
+
+	get i
+	
+	dup text dup
+	catv '~'
+	get $
+	swap pop
+	set $1 $
+	pop pop
+
+	subv 1
+	set i $
+
+	gotoz Update.Loop2.break
+	goto Update.Loop2
+	@Update.Loop2.break
+
+	ret
+
+@EndOfFunctions
+
+# Init data
+get noc
+addv 1
+set i $
+pop
+
+@InitData
+
+get i
+
+dup
+text
+set $ 0
+pop
+
+subv 1
+set i $
+
+gotoz InitData.break
+goto InitData
+@InitData.break
+
+set '1' 1
+set '0' 0
+
+# Main loop
+
+@MainLoop
+
+get nol
+subv 1
+set nol $
+
+call PrintLine
+call Update
+
+gotoz Exit
+goto MainLoop
+
+@Exit
+

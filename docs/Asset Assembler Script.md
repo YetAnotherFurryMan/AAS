@@ -106,14 +106,12 @@ The `rot` rotates the three top-most elements (moves the top-most under the thir
 ### Variables
 
 `set [ID] [ANY]`
-`set [STR] [ANY]`
-`set [FST] [ANY]`
+`set [TXT] [ANY]`
 
 Sets the variable (first argument) to the given value (the second one).
 
 `get [ID]`
-`get [STR]`
-`get [FST]`
+`get [TXT]`
 
 Pushes the value of the given variable on the stack.
 
