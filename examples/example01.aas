@@ -1,6 +1,0 @@
-import console
-
-push "Hello World\n"
-
-console.print
-pop

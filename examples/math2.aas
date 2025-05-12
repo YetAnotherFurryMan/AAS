@@ -1,0 +1,98 @@
+# This example shows basic mathematical commands using varables.
+
+use console
+
+# Ask for input
+
+printv 'A: '
+scani
+
+# Setup the variable to the top-most value on the stack.
+set a $
+pop
+
+printv 'B: '
+scani
+
+# Setup b variable.
+set b $
+pop
+
+# Addition
+
+# Generate the operation string ('[A] + [B] = [A + B]\n')
+
+get a # Push the value of a onto the stack. [A]
+
+catv ' + ' # ['A + ']
+get b      # ['A + ', B]
+cat        # ['A + B']
+catv ' = ' # ['A + B = ']
+
+# Calcualte the sum
+
+get a # ['...', A]
+get b # ['...', A, B]
+add   # ['...', A + B]
+
+# Calcualte and print final string
+
+cat
+catv "\n"
+print pop
+
+# Substraction
+
+get a
+catv ' - '
+get b
+cat
+catv ' = '
+get a
+get b
+sub
+cat
+catv "\n"
+print pop
+
+# Multiplication
+
+get a
+catv ' * '
+get b
+cat
+catv ' = '
+get a
+get b
+mul
+cat
+catv "\n"
+print pop
+
+# Division
+
+get a
+catv ' / '
+get b
+cat
+catv ' = '
+get a
+get b
+div
+cat
+catv "\n"
+print pop
+
+# Modulo
+
+get a
+catv ' % '
+get b
+cat
+catv ' = '
+get a
+get b
+mod
+cat
+catv "\n"
+print pop

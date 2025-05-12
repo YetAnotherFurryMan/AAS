@@ -1,0 +1,93 @@
+# This example shows basic mathematical commands using stack only.
+
+use console
+
+# Ask user for two integers
+# Note the usage of staring, not formatted string
+#  it is faster.
+
+printv 'A: '
+scani
+
+printv 'B: '
+scani
+
+# Now on the stack we have [A, B]
+# We must copy them first.
+
+dup  # [A, B, B]
+rot  # [B, A, B]
+swap # [B, B, A]
+dup  # [B, B, A, A]
+rot  # [B, A, B, A]
+swap # [B, A, A, B]
+
+# We can add now
+add # [B, A, A + B]
+
+# Push prefix
+push 'A + B = ' # [B, A, A + B, '...']
+swap # [B, A, '...', A + B]
+
+# Concatinate the result into prefix and a new line
+cat # [B, A, '...']
+catv "\n"
+
+# Print
+print pop swap # [A, B]
+
+# Note that now the stack looks the same as after input.
+
+# Substraction
+
+dup rot swap
+dup rot swap
+
+sub
+
+push 'A - B = '
+swap
+cat
+catv "\n"
+
+print pop swap
+
+# Multiplication
+
+dup rot swap
+dup rot swap
+
+mul
+
+push 'A * B = '
+swap
+cat
+catv "\n"
+
+print pop swap
+
+# Division
+
+dup rot swap
+dup rot swap
+
+div
+
+push 'A / B = '
+swap
+cat catv "\n"
+
+print pop swap
+
+# Modulo
+
+# Note, as it is the last operation, we do not need to copy.
+
+mod
+
+push 'A % B = '
+swap
+cat
+catv "\n"
+
+print pop
