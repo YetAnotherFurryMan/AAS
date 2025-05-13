@@ -24,8 +24,14 @@ DEFOP(mul, *)
 DEFOP(div, /)
 DEFOP(mod, %)
 
+DEFOP(gt, >)
+DEFOP(gtq, >=)
+DEFOP(lt, <)
+DEFOP(ltq, <=)
+
 #undef DEFOP
 
+// TODO: ObjectProto will have toString
 static std::unique_ptr<aas::Data> s_cat(aas::Data* a, aas::Data* b){
 	std::string text;
 
@@ -56,6 +62,34 @@ static std::unique_ptr<aas::Data> s_cat(aas::Data* a, aas::Data* b){
 	}
 
 	return std::make_unique<aas::Data>(aas::DataType::ERROR);
+}
+
+static std::unique_ptr<aas::Data> s_eq(aas::Data* a, aas::Data* b){
+	if(a->type != b->type)
+		return std::make_unique<aas::Integer>(0);
+	
+	switch(a->type){
+		case aas::DataType::INTEGER:
+			return std::make_unique<aas::Integer>(dynamic_cast<aas::Integer*>(a)->value == dynamic_cast<aas::Integer*>(b)->value);
+		case aas::DataType::TEXT:
+			return std::make_unique<aas::Integer>(dynamic_cast<aas::Text*>(a)->value == dynamic_cast<aas::Text*>(b)->value);
+		default:
+			return std::make_unique<aas::Integer>(0);
+	}
+}
+
+static std::unique_ptr<aas::Data> s_neq(aas::Data* a, aas::Data* b){
+	if(a->type != b->type)
+		return std::make_unique<aas::Integer>(1);
+	
+	switch(a->type){
+		case aas::DataType::INTEGER:
+			return std::make_unique<aas::Integer>(dynamic_cast<aas::Integer*>(a)->value != dynamic_cast<aas::Integer*>(b)->value);
+		case aas::DataType::TEXT:
+			return std::make_unique<aas::Integer>(dynamic_cast<aas::Text*>(a)->value != dynamic_cast<aas::Text*>(b)->value);
+		default:
+			return std::make_unique<aas::Integer>(1);
+	}
 }
 
 inline bool is_of_type(aas::DataType type, aas::DataType* dts, std::size_t count){
@@ -152,8 +186,43 @@ void aas::Program::useMath(){
 	ON(mod, aas::DataType::INTEGER);
 	ONV(mod, aas::DataType::INTEGER);
 
+	ON(gt, aas::DataType::INTEGER);
+	ONV(gt, aas::DataType::INTEGER);
+
+	ON(gtq, aas::DataType::INTEGER);
+	ONV(gtq, aas::DataType::INTEGER);
+
+	ON(lt, aas::DataType::INTEGER);
+	ONV(lt, aas::DataType::INTEGER);
+
+	ON(ltq, aas::DataType::INTEGER);
+	ONV(ltq, aas::DataType::INTEGER);
+
 	ON(cat, aas::DataType::INTEGER, aas::DataType::TEXT);
 	ONV(cat, aas::DataType::INTEGER, aas::DataType::TEXT);
+
+	ON(eq, aas::DataType::INTEGER, aas::DataType::TEXT, aas::DataType::OBJECT);
+	ONV(eq, aas::DataType::INTEGER, aas::DataType::TEXT, aas::DataType::OBJECT);
+	
+	ON(neq, aas::DataType::INTEGER, aas::DataType::TEXT, aas::DataType::OBJECT);
+	ONV(neq, aas::DataType::INTEGER, aas::DataType::TEXT, aas::DataType::OBJECT);
+
+	on("not", [](aas::Program& prog, std::size_t& pc){
+		if(prog.stack.size() <= 0){
+			prog.error = "\"not\": Stack is empty: " + prog.src[pc]->strloc();
+			return 1;
+		}
+
+		if(prog.stack.back()->type == aas::DataType::INTEGER){
+			aas::Integer* i = dynamic_cast<aas::Integer*>(prog.stack.back().get());
+			i->value = !i->value;
+		} else{
+			prog.stack.pop_back();
+			prog.stack.emplace_back(new aas::Integer(0));
+		}
+
+		return 0;
+	});
 }
 
 #undef ON

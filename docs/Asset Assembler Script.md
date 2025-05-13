@@ -174,6 +174,40 @@ The `mod` returns the reminder of division of two operands on the stack.
 
 The `cat` command concatenates operands. The supported types are text and integer, but it always returns text on the stack.
 
+`gt`
+`gtv [INT]`
+
+Pushes 1 if the first operand is grater than the second, 0 otherwise.
+
+`gtq`
+`gtqv [INT]`
+
+Same as `gt`, but covers the equal case.
+
+`lt`
+`ltv [INT]`
+
+Pushes 1 if the first operand is less than the second, 0 otherwise.
+
+`ltq`
+`ltqv [INT]`
+
+Same as `lt`, but covers the equal case.
+
+`eq`
+`eqv [ANY]`
+
+Pushes 1 if the operands are equal to eachother, note that objects cannot be equal to anything.
+
+`neq`
+`newv [ANY]`
+
+The very negation of `eq`.
+
+`not`
+
+Takes only one operand, pushes 1 if it is an integer with value 0, pushes 0 in any other case.
+
 ### Flow
 
 `label [ID]`

@@ -75,13 +75,15 @@ div
 
 push 'A / B = '
 swap
-cat catv "\n"
+cat
+catv "\n"
 
 print pop swap
 
 # Modulo
 
-# Note, as it is the last operation, we do not need to copy.
+dup rot swap
+dup rot swap
 
 mod
 
@@ -90,4 +92,46 @@ swap
 cat
 catv "\n"
 
+print pop swap
+
+# Equality
+
+dup rot swap
+dup rot swap
+
+eq
+
+push 'A == B = '
+swap
+cat
+catv "\n"
+
+print pop swap
+
+# Less than
+
+dup rot swap
+dup rot swap
+
+lt
+
+push 'A < B = '
+swap
+cat
+catv "\n"
+
+print pop swap
+
+# Greater than
+
+# Note, as it is the last operation, we do not need to copy.
+
+gt
+
+push 'A > B = '
+swap
+cat
+catv "\n"
+
 print pop
+

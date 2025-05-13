@@ -96,3 +96,45 @@ mod
 cat
 catv "\n"
 print pop
+
+# Equality
+
+get a
+catv ' == '
+get b
+cat
+catv ' = '
+get a
+get b
+eq
+cat
+catv "\n"
+print pop
+
+# Less than
+
+get a
+catv ' < '
+get b
+cat
+catv ' = '
+get a
+get b
+lt
+cat
+catv "\n"
+print pop
+
+# Greater than
+
+get a
+catv ' > '
+get b
+cat
+catv ' = '
+get a
+get b
+gt
+cat
+catv "\n"
+print pop
