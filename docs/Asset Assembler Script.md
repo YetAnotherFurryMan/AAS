@@ -125,6 +125,22 @@ Converts whatever lies on the stack to text.
 
 Converts whatever lies on the stack to integer (with value of 0 on error).
 
+`isText`
+
+Pushes 1 if the top of the stack is of type text, 0 otherwise.
+
+`isInt`
+
+Pushes 1 if the top-most element of the stack is of thupe integer, 0 otherwise.
+
+`isObj`
+
+Pushes 1 when the top of the stack is an object or 0.
+
+`ofType [TXT]`
+
+Pushes 1 if the top-most element of the stack is of type object ant its name is equal to given text, 0 otherwise.
+
 ### Math
 
 `add`

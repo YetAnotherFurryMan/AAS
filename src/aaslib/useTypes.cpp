@@ -26,7 +26,7 @@ void aas::Program::useTypes(){
 			} break;
 			default:
 				prog.stack.emplace_back(new aas::Data(aas::DataType::ERROR));
-				return 1;
+				return 2;
 		}
 
 		return 0;
@@ -57,10 +57,81 @@ void aas::Program::useTypes(){
 			} break;
 			default:
 				prog.stack.emplace_back(new aas::Data(aas::DataType::ERROR));
-				return 1;
+				return 2;
 		}
 
 		return 0;
 
+	});
+
+	on("isText", [](aas::Program& prog, std::size_t& pc){
+		if(prog.stack.size() <= 0){
+			prog.error = "\"isText\": The stack is empty: " + prog.src[pc]->strloc();
+			return 1;
+		}
+
+		if(prog.stack.back()->type == aas::DataType::TEXT)
+			prog.stack.emplace_back(new aas::Integer(1));
+		else
+			prog.stack.emplace_back(new aas::Integer(0));
+
+		return 0;
+	});
+
+	on("isInt", [](aas::Program& prog, std::size_t& pc){
+		if(prog.stack.size() <= 0){
+			prog.error = "\"isInt\": The stack is empty: " + prog.src[pc]->strloc();
+			return 1;
+		}
+
+		if(prog.stack.back()->type == aas::DataType::INTEGER)
+			prog.stack.emplace_back(new aas::Integer(1));
+		else
+			prog.stack.emplace_back(new aas::Integer(0));
+
+		return 0;
+	});
+
+	on("isObj", [](aas::Program& prog, std::size_t& pc){
+		if(prog.stack.size() <= 0){
+			prog.error = "\"isObj\": The stack is empty: " + prog.src[pc]->strloc();
+			return 1;
+		}
+
+		if(prog.stack.back()->type == aas::DataType::OBJECT)
+			prog.stack.emplace_back(new aas::Integer(1));
+		else
+			prog.stack.emplace_back(new aas::Integer(0));
+
+		return 0;
+	});
+
+	on("ofType", [](aas::Program& prog, std::size_t& pc){
+		if(prog.stack.size() <= 0){
+			prog.error = "\"ofType\": The stack is empty: " + prog.src[pc]->strloc();
+			return 1;
+		}
+
+		pc++;
+		if(pc >= prog.src.size()){
+			prog.error = "\"ofType\": Expected an value: " + prog.src[pc - 1]->strloc();
+			return 2;
+		}
+
+		std::unique_ptr<aas::Data> data = aas::toData(prog, prog.src[pc].get());
+		aas::Text* text = dynamic_cast<aas::Text*>(data.get());
+		if(!text){
+			prog.error = "\"ofType\": Expected a text: " + prog.src[pc]->strloc();
+			return 3;
+		}
+
+		if(prog.stack.back()->type != aas::DataType::OBJECT)
+			prog.stack.emplace_back(new aas::Integer(0));
+		else if(dynamic_cast<aas::Object*>(prog.stack.back().get())->name == text->value)
+			prog.stack.emplace_back(new aas::Integer(1));
+		else
+			prog.stack.emplace_back(new aas::Integer(0));
+
+		return 0;
 	});
 }
