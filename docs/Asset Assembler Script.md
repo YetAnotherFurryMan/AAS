@@ -131,7 +131,7 @@ Pushes 1 if the top of the stack is of type text, 0 otherwise.
 
 `isInt`
 
-Pushes 1 if the top-most element of the stack is of thupe integer, 0 otherwise.
+Pushes 1 if the top-most element of the stack is of type integer, 0 otherwise.
 
 `isObj`
 
@@ -197,7 +197,7 @@ Same as `lt`, but covers the equal case.
 `eq`
 `eqv [ANY]`
 
-Pushes 1 if the operands are equal to eachother, note that objects cannot be equal to anything.
+Pushes 1 if the operands are equal to each other, note that objects cannot be equal to anything.
 
 `neq`
 `newv [ANY]`
