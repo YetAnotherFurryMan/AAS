@@ -14,7 +14,6 @@ namespace aas{
 		ENDOF,
 		NUMBER,
 		STRING,
-		FSTRING,
 		IDENTIFIER,
 		STACKREF,
 		LABEL
@@ -56,16 +55,6 @@ namespace aas{
 		String() = default;
 		String(std::string_view filename, std::size_t lineno, std::size_t charno, std::string_view value):
 			Token{TokenType::STRING, filename, lineno, charno},
-			value{value}
-		{}
-	};
-
-	struct FString: public Token{
-		std::string value;
-
-		FString() = default;
-		FString(std::string_view filename, std::size_t lineno, std::size_t charno, std::string_view value):
-			Token{TokenType::FSTRING, filename, lineno, charno},
 			value{value}
 		{}
 	};
@@ -224,11 +213,6 @@ namespace aas{
 			{
 				String* str = dynamic_cast<String*>(tok);
 				return std::make_unique<Text>(str->value);
-			} break;
-			case TokenType::FSTRING:
-			{
-				FString* fstr = dynamic_cast<FString*>(tok);
-				return std::make_unique<Text>(fstr->value);
 			} break;
 			case TokenType::IDENTIFIER:
 			{

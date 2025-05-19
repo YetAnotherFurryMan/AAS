@@ -35,7 +35,6 @@ The data types are simpler than token types, for now there are only: integer, te
 | :--------------: | :-------: |
 | Number           | Integer   |
 | String           | Text      |
-| Formatted String | Text      |
 | Identifier       | Integer   |
 | Stack Reference  | _depends_ |
 | Label            | Integer   |

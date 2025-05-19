@@ -166,7 +166,7 @@ std::unique_ptr<aas::Token> aas::Program::next(std::istream& in, std::string_vie
 		if(!in.eof()){
 			charno++;
 			in.get();
-			return std::make_unique<aas::FString>(filename, lineno, cno, txt);
+			return std::make_unique<aas::String>(filename, lineno, cno, txt);
 		}
 	}
 
