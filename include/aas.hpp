@@ -93,7 +93,8 @@ namespace aas{
 		ERROR = 0,
 		INTEGER,
 		TEXT,
-		OBJECT
+		OBJECT,
+		REFERENCE
 	};
 
 	struct Data{
@@ -137,6 +138,15 @@ namespace aas{
 			Data{DataType::OBJECT},
 			name{name},
 			object{object}
+		{}
+	};
+
+	struct Reference: public Data{
+		std::unique_ptr<Data>& ref;
+
+		Reference(std::unique_ptr<Data>& ref):
+			Data{DataType::REFERENCE},
+			ref{ref}
 		{}
 	};
 
@@ -197,8 +207,13 @@ namespace aas{
 				Object* o = dynamic_cast<Object*>(data);
 				return std::make_unique<Object>(o->name, o->object);
 			} break;
+			case DataType::REFERENCE:
+			{
+				Reference* r = dynamic_cast<Reference*>(data);
+				return std::make_unique<Reference>(r->ref);
+			} break;
 			default:
-				return std::make_unique<Data>(data->type);
+				return std::make_unique<Data>(aas::DataType::ERROR);
 		}
 	}
 

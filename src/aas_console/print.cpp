@@ -17,6 +17,11 @@ static int s_print(aas::Data* data){
 			aas::Object* o = dynamic_cast<aas::Object*>(data);
 			std::cout << "[" << o->name << ": " << o->object << "]";
 		} break;
+		case aas::DataType::REFERENCE:
+		{
+			aas::Reference* r = dynamic_cast<aas::Reference*>(data);
+			return s_print(r->ref.get());
+		}
 		default:
 			return 1;
 	}

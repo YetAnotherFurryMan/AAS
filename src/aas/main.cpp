@@ -88,18 +88,26 @@ int main(int argc, const char** argv){
 		std::cerr << "ERROR: Stack not empty:" << std::endl;
 		for(std::size_t i = prog.stack.size(); i > 0; i--){
 			std::cerr << i << ": ";
-			switch(prog.stack[i - 1]->type){
+			aas::Data* data =  prog.stack[i - 1].get();
+			if(data->type == aas::DataType::REFERENCE){
+				std::cerr << "&";
+				data = dynamic_cast<aas::Reference*>(prog.stack[i - 1].get())->ref.get();
+			}
+			switch(data->type){
 				case aas::DataType::ERROR:
 					std::cerr << "(ERROR)";
 					break;
 				case aas::DataType::INTEGER:
-					std::cerr << "(INTEGER) " << dynamic_cast<aas::Integer*>(prog.stack[i - 1].get())->value;
+					std::cerr << "(INTEGER) " << dynamic_cast<aas::Integer*>(data)->value;
 					break;
 				case aas::DataType::TEXT:
-					std::cerr << "(TEXT) " << dynamic_cast<aas::Text*>(prog.stack[i - 1].get())->value;
+					std::cerr << "(TEXT) " << dynamic_cast<aas::Text*>(data)->value;
 					break;
 				case aas::DataType::OBJECT:
-					std::cerr << "(OBJECT) " << dynamic_cast<aas::Object*>(prog.stack[i - 1].get())->name << ": " << dynamic_cast<aas::Object*>(prog.stack[i - 1].get())->object;
+					std::cerr << "(OBJECT) " << dynamic_cast<aas::Object*>(data)->name << ": " << dynamic_cast<aas::Object*>(data)->object;
+					break;
+				case aas::DataType::REFERENCE:
+					std::cerr << "(!!!)";
 					break;
 			}
 			std::cerr << std::endl;

@@ -75,4 +75,39 @@ void aas::Program::useVars(){
 
 		return 0;
 	});
+
+	on("ref", [](aas::Program& prog, std::size_t& pc){
+		pc++;
+		if(pc >= prog.src.size()){
+			prog.error = "\"ref\": Expected a value, but got nothing: " + prog.src[pc - 1]->strloc();
+			return 1;
+		}
+
+		std::string name;
+		if(prog.src[pc]->type == aas::TokenType::IDENTIFIER){
+			aas::Identifier* id = dynamic_cast<aas::Identifier*>(prog.src[pc].get());
+			name = prog.ids[id->index];
+		} else {
+			std::unique_ptr<aas::Data> data = aas::toData(prog, prog.src[pc].get());
+			if(data->type == aas::DataType::ERROR){
+				return 2;
+			} 
+
+			if(data->type != aas::DataType::TEXT){
+				prog.error = "\"ref\": Expected a name (identifier or text): " + prog.src[pc]->strloc();
+				return 3;
+			}
+
+			name = dynamic_cast<aas::Text*>(data.get())->value;
+		}
+
+		if(prog.vars.find(name) == prog.vars.end()){
+			prog.error = "\"ref\": No such varable: '" + name + "': " + prog.src[pc - 1]->strloc();
+			return 3;
+		}
+
+		prog.stack.emplace_back(new aas::Reference(prog.vars[name]));
+
+		return 0;
+	});
 }

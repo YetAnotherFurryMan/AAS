@@ -7,17 +7,21 @@ void aas::Program::useTypes(){
 			return 1;
 		}
 
-
 		if(prog.stack.back()->type == aas::DataType::TEXT)
 			return 0;
 		
-		std::unique_ptr<aas::Data> top = std::move(prog.stack.back());
+		std::unique_ptr<aas::Data> _top = std::move(prog.stack.back());
 		prog.stack.pop_back();
+
+		aas::Data* top = _top.get();
+		if(top->type == aas::DataType::REFERENCE){
+			top = dynamic_cast<aas::Reference*>(top)->ref.get();
+		}
 
 		switch(top->type){
 			case aas::DataType::INTEGER:
 			{
-				aas::Integer* i = dynamic_cast<aas::Integer*>(top.get());
+				aas::Integer* i = dynamic_cast<aas::Integer*>(top);
 				prog.stack.emplace_back(new aas::Text(std::to_string(i->value)));
 			} break;
 			case aas::DataType::OBJECT:
@@ -38,17 +42,21 @@ void aas::Program::useTypes(){
 			return 1;
 		}
 
-
 		if(prog.stack.back()->type == aas::DataType::INTEGER)
 			return 0;
 		
-		std::unique_ptr<aas::Data> top = std::move(prog.stack.back());
+		std::unique_ptr<aas::Data> _top = std::move(prog.stack.back());
 		prog.stack.pop_back();
+
+		aas::Data* top = _top.get();
+		if(top->type == aas::DataType::REFERENCE){
+			top = dynamic_cast<aas::Reference*>(top)->ref.get();
+		}
 
 		switch(top->type){
 			case aas::DataType::TEXT:
 			{
-				aas::Text* t = dynamic_cast<aas::Text*>(top.get());
+				aas::Text* t = dynamic_cast<aas::Text*>(top);
 				prog.stack.emplace_back(new aas::Integer(atol(t->value.c_str())));
 			} break;
 			case aas::DataType::OBJECT:
@@ -64,13 +72,38 @@ void aas::Program::useTypes(){
 
 	});
 
+	on("val", [](aas::Program& prog, std::size_t& pc){
+		if(prog.stack.size() <= 0){
+			prog.error = "\"val\": The stack is empty: " + prog.src[pc]->strloc();
+			return 1;
+		}
+
+		if(prog.stack.back()->type != aas::DataType::REFERENCE)
+			return 0;
+		
+		std::unique_ptr<aas::Data> _top = std::move(prog.stack.back());
+		prog.stack.pop_back();
+
+		aas::Data* top = _top.get();
+		top = dynamic_cast<aas::Reference*>(top)->ref.get();
+
+		prog.stack.emplace_back(aas::copy(top));
+
+		return 0;
+
+	});
+
 	on("isText", [](aas::Program& prog, std::size_t& pc){
 		if(prog.stack.size() <= 0){
 			prog.error = "\"isText\": The stack is empty: " + prog.src[pc]->strloc();
 			return 1;
 		}
 
-		if(prog.stack.back()->type == aas::DataType::TEXT)
+		std::unique_ptr<aas::Data>& top = prog.stack.back();
+
+		if(top->type == aas::DataType::TEXT)
+			prog.stack.emplace_back(new aas::Integer(1));
+		else if(top->type == aas::DataType::REFERENCE && dynamic_cast<aas::Reference*>(top.get())->ref->type == aas::DataType::TEXT)
 			prog.stack.emplace_back(new aas::Integer(1));
 		else
 			prog.stack.emplace_back(new aas::Integer(0));
@@ -84,7 +117,11 @@ void aas::Program::useTypes(){
 			return 1;
 		}
 
-		if(prog.stack.back()->type == aas::DataType::INTEGER)
+		std::unique_ptr<aas::Data>& top = prog.stack.back();
+
+		if(top->type == aas::DataType::INTEGER)
+			prog.stack.emplace_back(new aas::Integer(1));
+		else if(top->type == aas::DataType::REFERENCE && dynamic_cast<aas::Reference*>(top.get())->ref->type == aas::DataType::INTEGER)
 			prog.stack.emplace_back(new aas::Integer(1));
 		else
 			prog.stack.emplace_back(new aas::Integer(0));
@@ -98,7 +135,11 @@ void aas::Program::useTypes(){
 			return 1;
 		}
 
-		if(prog.stack.back()->type == aas::DataType::OBJECT)
+		std::unique_ptr<aas::Data>& top = prog.stack.back();
+
+		if(top->type == aas::DataType::OBJECT)
+			prog.stack.emplace_back(new aas::Integer(1));
+		else if(top->type == aas::DataType::REFERENCE && dynamic_cast<aas::Reference*>(top.get())->ref->type == aas::DataType::OBJECT)
 			prog.stack.emplace_back(new aas::Integer(1));
 		else
 			prog.stack.emplace_back(new aas::Integer(0));
@@ -114,7 +155,7 @@ void aas::Program::useTypes(){
 
 		pc++;
 		if(pc >= prog.src.size()){
-			prog.error = "\"ofType\": Expected an value: " + prog.src[pc - 1]->strloc();
+			prog.error = "\"ofType\": Expected a value: " + prog.src[pc - 1]->strloc();
 			return 2;
 		}
 
@@ -125,9 +166,14 @@ void aas::Program::useTypes(){
 			return 3;
 		}
 
-		if(prog.stack.back()->type != aas::DataType::OBJECT)
+		aas::Data* top = prog.stack.back().get();
+		if(data->type == aas::DataType::REFERENCE){
+			top = dynamic_cast<aas::Reference*>(top)->ref.get();
+		}
+
+		if(top->type != aas::DataType::OBJECT)
 			prog.stack.emplace_back(new aas::Integer(0));
-		else if(dynamic_cast<aas::Object*>(prog.stack.back().get())->name == text->value)
+		else if(dynamic_cast<aas::Object*>(top)->name == text->value)
 			prog.stack.emplace_back(new aas::Integer(1));
 		else
 			prog.stack.emplace_back(new aas::Integer(0));

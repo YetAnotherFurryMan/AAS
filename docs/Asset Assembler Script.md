@@ -29,7 +29,7 @@ The same happens when PC is pointing at an identifier with no command assigned, 
 
 ## Stack datatypes
 
-The data types are simpler than token types, for now there are only: integer, text, and object.
+The data types are simpler than token types, for now there are only: integer, text, object, and reference. There is the table of conversions:
 
 | Token Type       | Data Type |
 | :--------------: | :-------: |
@@ -38,6 +38,13 @@ The data types are simpler than token types, for now there are only: integer, te
 | Identifier       | Integer   |
 | Stack Reference  | _depends_ |
 | Label            | Integer   |
+
+As you can see, Integer is the equivalent of Number and stores any 64bit integer value, similarly Text is the same as String.
+Identifiers and Labels will be converted to positive Integer as it is the real value of these tokens.
+Stack Reference shall be replaced with related stack value and so its data type depends on what is currently on the stack.
+Referring to Stack Reference may cause failure when the stack is too small or empty.
+A Reference is a special kind of type which becomes the value of the variable that it refers to and can change said value.
+The only way to get the Reference type is by using `ref`.
 
 ## Built-in commands
 
@@ -114,6 +121,11 @@ Sets the variable (first argument) to the given value (the second one).
 
 Pushes the value of the given variable on the stack.
 
+`ref [ID]`
+`ref [TXT]`
+
+Pushes a reference to the value of the given variable.
+
 ### Types
 
 `text`
@@ -123,6 +135,10 @@ Converts whatever lies on the stack to text.
 `int`
 
 Converts whatever lies on the stack to integer (with value of 0 on error).
+
+`val`
+
+Ensures that the top-most stack value is not a reference.
 
 `isText`
 
