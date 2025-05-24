@@ -33,6 +33,7 @@ inline int s_print(aas::Program& prog, aas::Token* tok){
 	if(tok->type == aas::TokenType::IDENTIFIER){
 		aas::Identifier* id = dynamic_cast<aas::Identifier*>(tok);
 		std::cout << "[" << id->index << ": " << prog.ids[id->index] << "]";
+		return 0;
 	}
 
 	std::unique_ptr<aas::Data> p = aas::toData(prog, tok);
@@ -56,7 +57,7 @@ int aas::console::print(aas::Program& prog, std::size_t& pc){
 int aas::console::printv(aas::Program& prog, std::size_t& pc){
 	pc++;
 	if(pc >= prog.src.size()){
-		prog.error = "\"console.printv\": Expected a module name: " + prog.src[pc - 1]->strloc();
+		prog.error = "\"console.printv\": Expected a value, but got nothing: " + prog.src[pc - 1]->strloc();
 		return 1;
 	}
 

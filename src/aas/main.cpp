@@ -1,13 +1,61 @@
 #include <fstream>
+#include <sstream>
 
 #include <aas.hpp>
-#include <aas_console.hpp>
+
+#include <dlfcn.h>
+
+typedef void(use_t)(aas::Program&, bool);
+
+struct DLL{
+	void* hnd;
+	std::string name;
+	std::string error;
+
+	DLL() = default;
+	DLL(std::string_view name):
+		name{name}
+	{
+		std::stringstream ss;
+		std::string n(name);
+		dlerror();
+		hnd = dlopen(n.c_str(), RTLD_NOW | RTLD_LAZY);
+		ss << "NOTE: While loading: " << dlerror() << std::endl;
+		n += ".so";
+		if(!hnd)
+			hnd = dlopen(n.c_str(), RTLD_NOW | RTLD_LAZY);
+		ss << "NOTE: While loading: " << dlerror() << std::endl;
+		n = "aas_" + n;
+		if(!hnd)
+			hnd = dlopen(n.c_str(), RTLD_NOW | RTLD_LAZY);
+		ss << "NOTE: While loading: " << dlerror() << std::endl;
+		if(!hnd)
+			error = "DLL: Failed to load: " + this->name + "\n" + ss.str();
+	}
+
+	~DLL(){
+		if(hnd){
+			dlclose(hnd);
+			hnd = nullptr;
+		}
+	}
+
+	inline int use(aas::Program& prog, bool aliases){
+		use_t* fn = (use_t*) dlsym(hnd, ("_ZN3aas" + std::to_string(name.length()) + name + "3useERNS_7ProgramEb").c_str());
+		if(!fn)
+			return 1;
+		fn(prog, aliases);
+		return 0;
+	}
+};
 
 void usage(const char* name){
 	std::cerr << "USAGE: " << name << " [INPUT]" << std::endl;
 }
 
 std::function<int(aas::Program&, std::size_t&)> createUseOp(bool aliases){
+	static std::unordered_map<std::string, std::unique_ptr<DLL>> dlls;
+
 	return [aliases](aas::Program& prog, std::size_t& pc){
 		pc++;
 		if(pc >= prog.src.size()){
@@ -15,7 +63,7 @@ std::function<int(aas::Program&, std::size_t&)> createUseOp(bool aliases){
 			return 1;
 		}
 
-		std::string_view name;
+		std::string name;
 
 		{
 			aas::Identifier* id = dynamic_cast<aas::Identifier*>(prog.src[pc].get());
@@ -32,12 +80,26 @@ std::function<int(aas::Program&, std::size_t&)> createUseOp(bool aliases){
 			}
 		}
 
-		if(name == "console"){
-			aas::console::use(prog, aliases);
-		} else{
-			prog.error = "\"use\": Module '" + std::string(name) + "' not found: " + prog.src[pc]->strloc();
+		if(dlls.find(name) != dlls.end()){
+			// The module is used
+			return 0;
+		}
+
+		DLL* dll = new DLL(name);
+
+		if(!dll->hnd){
+			prog.error = "\"use\": Module '" + std::string(name) + "' not found: " + prog.src[pc]->strloc() + "\n" + dll->error;
+			delete dll;
 			return 3;
 		}
+
+		if(dll->use(prog, aliases)){
+			prog.error = "\"use\": Bad module '" + std::string(name) + "': " + prog.src[pc]->strloc();
+			delete dll;
+			return 4;
+		}
+
+		dlls[name] = std::unique_ptr<DLL>(dll);
 
 		return 0;
 	};

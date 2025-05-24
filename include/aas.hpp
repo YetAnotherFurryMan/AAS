@@ -128,13 +128,16 @@ namespace aas{
 		{}
 	};
 
-	// TODO: Destructor? std::shared_ptr?
+	struct ObjectProto{
+		virtual ~ObjectProto() = default;
+	};
+
 	struct Object: public Data{
 		std::string name;
-		void* object;
+		std::shared_ptr<ObjectProto> object;
 
 		Object() = default;
-		Object(const std::string& name, void* object):
+		Object(const std::string& name, std::shared_ptr<ObjectProto> object):
 			Data{DataType::OBJECT},
 			name{name},
 			object{object}
