@@ -4,7 +4,7 @@ AAS is a simple scripting language made with intention to generate all kinds of 
 The syntax may look like assemble at first, but it's really different.
 This language is stack-based (uses stack for most operations), but it also has variables (only global).
 
-You can find the language reference in [docs](/docs/Asset Assembler Script.md).
+You can find the language reference in [docs](docs/Asset%20Assembler%20Script.md).
 
 The library reference is work-in-progress.
 
