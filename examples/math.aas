@@ -34,7 +34,7 @@ cat # [B, A, '...']
 catv "\n"
 
 # Print
-print pop swap # [A, B]
+print swap # [A, B]
 
 # Note that now the stack looks the same as after input.
 
@@ -50,7 +50,7 @@ swap
 cat
 catv "\n"
 
-print pop swap
+print swap
 
 # Multiplication
 
@@ -64,7 +64,7 @@ swap
 cat
 catv "\n"
 
-print pop swap
+print swap
 
 # Division
 
@@ -78,7 +78,7 @@ swap
 cat
 catv "\n"
 
-print pop swap
+print swap
 
 # Modulo
 
@@ -92,7 +92,7 @@ swap
 cat
 catv "\n"
 
-print pop swap
+print swap
 
 # Equality
 
@@ -106,7 +106,7 @@ swap
 cat
 catv "\n"
 
-print pop swap
+print swap
 
 # Less than
 
@@ -120,7 +120,7 @@ swap
 cat
 catv "\n"
 
-print pop swap
+print swap
 
 # Greater than
 
@@ -133,5 +133,5 @@ swap
 cat
 catv "\n"
 
-print pop
+print
 

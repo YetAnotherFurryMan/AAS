@@ -39,7 +39,7 @@ add   # ['...', A + B]
 
 cat
 catv "\n"
-print pop
+print
 
 # Substraction
 
@@ -53,7 +53,7 @@ get b
 sub
 cat
 catv "\n"
-print pop
+print
 
 # Multiplication
 
@@ -67,7 +67,7 @@ get b
 mul
 cat
 catv "\n"
-print pop
+print
 
 # Division
 
@@ -81,7 +81,7 @@ get b
 div
 cat
 catv "\n"
-print pop
+print
 
 # Modulo
 
@@ -95,7 +95,7 @@ get b
 mod
 cat
 catv "\n"
-print pop
+print
 
 # Equality
 
@@ -109,7 +109,7 @@ get b
 eq
 cat
 catv "\n"
-print pop
+print
 
 # Less than
 
@@ -123,7 +123,7 @@ get b
 lt
 cat
 catv "\n"
-print pop
+print
 
 # Greater than
 
@@ -137,4 +137,4 @@ get b
 gt
 cat
 catv "\n"
-print pop
+print

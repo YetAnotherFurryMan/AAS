@@ -5,7 +5,6 @@ use console
 # Print Hello World via stack
 push "Hello World!\n"
 print
-pop
 
 # Print Hello World via value
 printv "Hello World!\n"
